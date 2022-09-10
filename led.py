@@ -41,8 +41,15 @@ while True:
     ts = urllib.request.urlopen(
         f"http://api.thingspeak.com/channels/{CHANNEL_ID}/feeds/last.json?api_key={READ_API_KEY}"
     )
+    # read status from status.txt file
+    with open("status.txt", "r") as f:
+        status = int(f.read())
+
+    while status!=2:
+        pass
 
     data = json.loads(ts.read())
+    
 
     TIME = data["created_at"]
     if PREV_TIME is None or TIME == PREV_TIME:
@@ -79,7 +86,9 @@ while True:
         time.sleep(DELAY)
 
     PREV_TIME = TIME
-
+    # write status to status.txt file
+    with open("status.txt", "w") as f:
+        f.write("3")
     ts.close()
 
     R_PWM.start(100)

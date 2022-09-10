@@ -137,7 +137,7 @@ CHANNEL_ID = "1848369"
 diameters_str = ",".join([str(d) for d in diameters])
 
 conn = urllib.request.urlopen(
-    f"http://api.thingspeak.com/update?api_key={WRITE_API_KEY}&field1={diameters_str}"
+    f"http://api.thingspeak.com/update?api_key={WRITE_API_KEY}&field6={diameters_str}"
 )
 
 conn.close()

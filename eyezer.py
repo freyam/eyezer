@@ -18,30 +18,6 @@ while True:
     print("\033c", end="")
     print("Diameters:", diameters)
 
-    with open("status.txt", "r") as f:
-        status = int(f.read())
-
-    while status == 0:
-        ts = urllib.request.urlopen(
-            f"http://api.thingspeak.com/channels/{CHANNEL_ID}/feeds/last.json?api_key={READ_API_KEY}"
-        )
-
-        data = json.loads(ts.read())
-        status = -1
-        if data["field7"] is not None:
-            status = int(data["field7"])
-        else:
-            status = 0
-
-        ts.close()
-
-    if len(diameters) >= 1 and status == 1:
-        diameters = []
-        status = 2
-
-        with open("status.txt", "w") as f:
-            f.write(str(status))
-
     _, img = cap.read()
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     eyes = eye_cascade.detectMultiScale(gray_img, 1.1, 7)
@@ -102,8 +78,8 @@ while True:
         with open("status.txt", "w") as f:
             f.write(str(status))
 
-    # if cv2.waitKey(1) & 0xFF in [ord("q"), 27]:
-    #     break
+    if cv2.waitKey(1) & 0xFF in [ord("q"), 27]:
+        break
 
 cap.release()
 cv2.destroyAllWindows()

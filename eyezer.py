@@ -12,11 +12,36 @@ eye_cascade = cv2.CascadeClassifier("haarcascae_eye.xml")
 cap = cv2.VideoCapture(0)
 
 diameters = []
+status = 0
 
 
 while True:
     print("\033c", end="")
     print("Diameters:", diameters)
+
+    with open("status.txt", "r") as f:
+        status = int(f.read())
+
+    while status == 0:
+        ts = urllib.request.urlopen(
+            f"http://api.thingspeak.com/channels/{CHANNEL_ID}/feeds/last.json?api_key={READ_API_KEY}"
+        )
+
+        data = json.loads(ts.read())
+        status = -1
+        if data["field7"] is not None:
+            status = int(data["field7"])
+        else:
+            status = 0
+
+        ts.close()
+
+    if len(diameters) >= 1 and status == 1:
+        diameters = []
+        status = 2
+
+        with open("status.txt", "w") as f:
+            f.write(str(status))
 
     _, img = cap.read()
     gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

@@ -37,16 +37,17 @@ CHANNEL_ID = "1848369"
 WRITE_API_KEY = "P3RYOEFOD90DB9FY"
 READ_API_KEY = "5Y175EF80D2KQ470"
 
-while True:
-    ts = urllib.request.urlopen(
-        f"http://api.thingspeak.com/channels/{CHANNEL_ID}/feeds/last.json?api_key={READ_API_KEY}"
-    )
 
+while True:
     with open("status.txt", "r") as f:
         status = int(f.read())
 
     while status != 2:
         continue
+
+    ts = urllib.request.urlopen(
+        f"http://api.thingspeak.com/channels/{CHANNEL_ID}/feeds/last.json?api_key={READ_API_KEY}"
+    )
 
     data = json.loads(ts.read())
 
@@ -68,6 +69,7 @@ while True:
     )
 
     for _ in range(ITERATIONS):
+        print(f"[$] Starting iteration {_ + 1}")
         if isinstance(COLOR_PWMS, tuple):
             for COLOR_PWM in COLOR_PWMS:
                 COLOR_PWM.ChangeDutyCycle(100 - INTENSITY)

@@ -18,6 +18,9 @@ R_PWM = GPIO.PWM(R_PIN, 100)
 G_PWM = GPIO.PWM(G_PIN, 100)
 B_PWM = GPIO.PWM(B_PIN, 100)
 
+R_PWM.start(0)
+G_PWM.start(0)
+B_PWM.start(0)
 
 TS_COLORS = {
     0: {"name": "red", "pins": R_PIN, "pwm": R_PWM},

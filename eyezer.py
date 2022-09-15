@@ -51,7 +51,7 @@ while True:
         for (ex, ey, ew, eh) in eyes:
             cv2.rectangle(img, (ex, ey), (ex + ew, ey + eh), (0, 0, 0), 2)
             blur = cv2.GaussianBlur(gray_img[ey : ey + eh, ex : ex + ew], (5, 5), 10)
-            erosion = cv2.erode(blur, np.ones((5, 5), np.uint8), iterations=2)
+            erosion = cv2.erode(blur, np.ones((5, 5), np.uint8), iterations=4)
 
             circles = cv2.HoughCircles(
                 erosion,
@@ -109,26 +109,31 @@ while True:
 cap.release()
 cv2.destroyAllWindows()
 
+THINGSPEAK_ST = input("Do you want to send the data to ThingSpeak? (y/n): ")
 
-if len(diameters) == 0:
-    print("No data")
-    exit()
+if THINGSPEAK_ST == "y":
+    if len(diameters) == 0:
+        print("No data")
+        exit()
 
-DIAMETER_STR = ",".join([str(d) for d in diameters])
+    DIAMETER_STR = ",".join([str(d) for d in diameters])
 
-conn = urllib.request.urlopen(
-    f"http://api.thingspeak.com/update?api_key={WRITE_API_KEY}&field6={DIAMETER_STR}"
-)
+    conn = urllib.request.urlopen(
+        f"http://api.thingspeak.com/update?api_key={WRITE_API_KEY}&field6={DIAMETER_STR}"
+    )
 
-conn.close()
+    conn.close()
 
-diameters = np.array(diameters)
-diameters = np.convolve(
-    diameters[np.abs(diameters - np.mean(diameters)) < 2 * np.std(diameters)],
-    np.ones(5) / 5,
-    mode="valid",
-)
+GRAPH_ST = input("Do you want to see a graph? (y/n): ")
 
-plt.ylabel("Pupil Diameter (mm)")
-plt.plot(diameters)
-plt.show()
+if GRAPH_ST == "y":
+    diameters = np.array(diameters)
+    diameters = np.convolve(
+        diameters[np.abs(diameters - np.mean(diameters)) < 2 * np.std(diameters)],
+        np.ones(5) / 5,
+        mode="valid",
+    )
+
+    plt.ylabel("Pupil Diameter (mm)")
+    plt.plot(diameters)
+    plt.show()

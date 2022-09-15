@@ -1,11 +1,7 @@
-import json
 import RPi.GPIO as GPIO
 import time
-import urllib.request
-
-R_PIN = 11  # Physical Pin 11
-G_PIN = 13  # Physical Pin 13
-B_PIN = 15  # Physical Pin 15
+import json
+from config import *
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
@@ -36,10 +32,7 @@ TS_COLORS = {
 
 PREV_TIME = None
 
-CHANNEL_ID = "1848369"
-WRITE_API_KEY = "P3RYOEFOD90DB9FY"
-READ_API_KEY = "5Y175EF80D2KQ470"
-
+data = {}
 
 while True:
     with open("status.txt", "r") as f:
@@ -48,11 +41,8 @@ while True:
     while status != 2:
         continue
 
-    ts = urllib.request.urlopen(
-        f"http://api.thingspeak.com/channels/{CHANNEL_ID}/feeds/last.json?api_key={READ_API_KEY}"
-    )
-
-    data = json.loads(ts.read())
+    with open("xinfo.txt","w") as f:
+        data = json.load(f);
 
     TIME = data["created_at"]
     if PREV_TIME is None or TIME == PREV_TIME:

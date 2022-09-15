@@ -3,10 +3,7 @@ import cv2
 import matplotlib.pyplot as plt
 import urllib.request
 import json
-
-WRITE_API_KEY = "P3RYOEFOD90DB9FY"
-READ_API_KEY = "5Y175EF80D2KQ470"
-CHANNEL_ID = "1848369"
+from config import *
 
 eye_cascade = cv2.CascadeClassifier("haarcascae_eye.xml")
 cap = cv2.VideoCapture(0)
@@ -14,6 +11,7 @@ cap = cv2.VideoCapture(0)
 diameters = []
 status = 0
 
+PREV_TIME = None
 
 while True:
     print("\033c", end="")
@@ -31,6 +29,8 @@ while True:
         status = -1
         if data["field7"] is not None:
             status = int(data["field7"])
+            with open("xinfo.txt", "w") as f:
+                f.write(json.dumps(data))                
         else:
             status = 0
 
@@ -50,7 +50,8 @@ while True:
     if len(eyes) > 0:
         for (ex, ey, ew, eh) in eyes:
             cv2.rectangle(img, (ex, ey), (ex + ew, ey + eh), (0, 0, 0), 2)
-            blur = cv2.GaussianBlur(gray_img[ey : ey + eh, ex : ex + ew], (5, 5), 10)
+            blur = cv2.GaussianBlur(
+                gray_img[ey: ey + eh, ex: ex + ew], (5, 5), 10)
             erosion = cv2.erode(blur, np.ones((5, 5), np.uint8), iterations=4)
 
             circles = cv2.HoughCircles(
@@ -129,7 +130,8 @@ GRAPH_ST = input("Do you want to see a graph? (y/n): ")
 if GRAPH_ST == "y":
     diameters = np.array(diameters)
     diameters = np.convolve(
-        diameters[np.abs(diameters - np.mean(diameters)) < 2 * np.std(diameters)],
+        diameters[np.abs(diameters - np.mean(diameters))
+                  < 2 * np.std(diameters)],
         np.ones(5) / 5,
         mode="valid",
     )

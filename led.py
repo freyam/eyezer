@@ -28,6 +28,11 @@ TS_COLORS = {
         "pins": (R_PIN, G_PIN, B_PIN),
         "pwm": (R_PWM, G_PWM, B_PWM),
     },
+    5: {
+        "name": "all",
+        "pins": (R_PIN, G_PIN, B_PIN),
+        "pwm": (R_PWM, G_PWM, B_PWM),
+    },
 }
 
 PREV_TIME = None
@@ -41,8 +46,8 @@ while True:
     while status != 2:
         continue
 
-    with open("xinfo.txt","w") as f:
-        data = json.load(f);
+    with open("xinfo.txt", "w") as f:
+        data = json.load(f)
 
     TIME = data["created_at"]
     if PREV_TIME is None or TIME == PREV_TIME:
@@ -57,37 +62,83 @@ while True:
     COLOR_PINS = TS_COLORS[int(data["field5"])]["pins"]
     COLOR_PWMS = TS_COLORS[int(data["field5"])]["pwm"]
 
+    print("Patient in well lit room....")
+
+    time.sleep(60)
+
+    print("Patient in dark room....")
+
+    time.sleep(60)
+
     print(
         f"[$] {ITERATIONS} iterations of {INTENSITY}% {COLOR_NAME} for {DURATION}s with {DELAY}s delay"
     )
 
-    for _ in range(ITERATIONS):
-        print(f"[$] Starting iteration {_ + 1}")
-        if isinstance(COLOR_PWMS, tuple):
-            for COLOR_PWM in COLOR_PWMS:
-                COLOR_PWM.ChangeDutyCycle(100 - INTENSITY)
-        else:
-            COLOR_PWMS.ChangeDutyCycle(100 - INTENSITY)
+    if COLOR_NAME == "all":
+        for id, color in TS_COLORS.items():
+            if id != 5:
+                COLOR_PINS = TS_COLORS[id]["pins"]
+                COLOR_PWMS = TS_COLORS[id]["pwm"]
+                for _ in range(ITERATIONS):
+                    print(f"[$] Starting iteration {_ + 1}")
+                    if isinstance(COLOR_PWMS, tuple):
+                        for COLOR_PWM in COLOR_PWMS:
+                            COLOR_PWM.ChangeDutyCycle(100 - INTENSITY)
+                    else:
+                        COLOR_PWMS.ChangeDutyCycle(100 - INTENSITY)
 
-        time.sleep(DURATION)
+                    time.sleep(DURATION)
 
-        if isinstance(COLOR_PWMS, tuple):
-            for COLOR_PWM in COLOR_PWMS:
-                COLOR_PWM.ChangeDutyCycle(100)
-        else:
-            COLOR_PWMS.ChangeDutyCycle(100)
+                    if isinstance(COLOR_PWMS, tuple):
+                        for COLOR_PWM in COLOR_PWMS:
+                            COLOR_PWM.ChangeDutyCycle(100)
+                    else:
+                        COLOR_PWMS.ChangeDutyCycle(100)
 
-        time.sleep(DELAY)
+                    time.sleep(DELAY)
+                if id != 4:
+                    print("Changing Colour....")
+                    time.sleep(30)
+        PREV_TIME = TIME
 
-    PREV_TIME = TIME
+        with open("status.txt", "w") as f:
+            f.write("3")
 
-    with open("status.txt", "w") as f:
-        f.write("3")
+        ts.close()
 
-    ts.close()
+        R_PWM.start(100)
+        G_PWM.start(100)
+        B_PWM.start(100)
 
-    R_PWM.start(100)
-    G_PWM.start(100)
-    B_PWM.start(100)
+        time.sleep(1)
+    else:
+        for _ in range(ITERATIONS):
+            print(f"[$] Starting iteration {_ + 1}")
+            if isinstance(COLOR_PWMS, tuple):
+                for COLOR_PWM in COLOR_PWMS:
+                    COLOR_PWM.ChangeDutyCycle(100 - INTENSITY)
+            else:
+                COLOR_PWMS.ChangeDutyCycle(100 - INTENSITY)
 
-    time.sleep(1)
+            time.sleep(DURATION)
+
+            if isinstance(COLOR_PWMS, tuple):
+                for COLOR_PWM in COLOR_PWMS:
+                    COLOR_PWM.ChangeDutyCycle(100)
+            else:
+                COLOR_PWMS.ChangeDutyCycle(100)
+
+            time.sleep(DELAY)
+
+        PREV_TIME = TIME
+
+        with open("status.txt", "w") as f:
+            f.write("3")
+
+        ts.close()
+
+        R_PWM.start(100)
+        G_PWM.start(100)
+        B_PWM.start(100)
+
+        time.sleep(1)
